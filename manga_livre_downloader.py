@@ -44,8 +44,8 @@ class MangaLivreDownloader:
         for i in range(len(manga_chapters)):
             for j in range(i + 1, len(manga_chapters)):
                 if manga_chapters[i]['number'] == manga_chapters[j]['number']:
-                    manga_chapters[i]['number'] = f'{manga_chapters[i]["number"]}_{count}'
-                count += 1
+                    manga_chapters[j]['number'] = f'{manga_chapters[i]["number"]}_{count}'
+                    count += 1
             count = 1
         if chapter_selection[0] == 'last':
             manga_chapters = [manga_chapters[-1]]
@@ -109,6 +109,12 @@ if __name__ == '__main__':
         metavar = '<final_path>'
     )
     parser.add_argument(
+        '-p',
+        '--print-chapters',
+        action = 'store_true',
+        help = 'Print chapters and exit.'
+    )
+    parser.add_argument(
         '-n',
         '--no-pdf',
         action = 'store_true',
@@ -126,19 +132,28 @@ if __name__ == '__main__':
     for i in range(len(args.url)):
         try:
             manga_chapters = manga_livre_downloader.get_manga_chapters(args.url[i], args.chapter_selection)
+            if args.print_chapters:
+                for manga_chapter in manga_chapters:
+                    print(manga_chapter['number'])
+                break
             for j in range(len(manga_chapters)):
                 print(f'Downloading {manga_chapters[j]["name"]} Chapter {manga_chapters[j]["number"]} (URL {i + 1})...')
                 try:
                     manga_chapter_images = manga_livre_downloader.get_manga_chapter_images(manga_chapters[j])
                     manga_livre_downloader.download_manga_chapter_images(manga_chapters[j], manga_chapter_images)
+                except KeyboardInterrupt:
+                    exit(0)
                 except:
                     error_count += 1
                     print(f'* Failed to download {manga_chapters[j]["name"]} Chapter {manga_chapters[j]["number"]} (URL {i + 1}).')
                     if args.print_exceptions:
                         traceback.print_exc()
+        except KeyboardInterrupt:
+            exit(0)
         except:
             error_count += 1
             print(f'* Failed to download URL {i + 1}')
             if args.print_exceptions:
                 traceback.print_exc()
-    print(f'Finished ({error_count} error(s)).')
+    if not args.print_chapters:
+        print(f'Finished ({error_count} error(s)).')
