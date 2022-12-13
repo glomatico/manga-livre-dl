@@ -74,7 +74,7 @@ class MangaLivreDownloader:
         manga_chapter_images_location = [
             manga_chapter_images_path / f'{i + 1:02d}.{manga_chapter_images[i].split(".")[-1]}' for i in range(len(manga_chapter_images))
         ]
-        imgdl.download(manga_chapter_images, manga_chapter_images_location)
+        imgdl.download(manga_chapter_images, manga_chapter_images_location, force = True)
         if not self.no_pdf:
             images = [Image.open(manga_chapter_images_location[i]) for i in range(len(manga_chapter_images_location))]
             images[0].save(
@@ -142,12 +142,14 @@ if __name__ == '__main__':
                     manga_chapter_images = manga_livre_downloader.get_manga_chapter_images(manga_chapters[j])
                     manga_livre_downloader.download_manga_chapter_images(manga_chapters[j], manga_chapter_images)
                 except KeyboardInterrupt:
-                    exit(0)
+                    exit()
                 except:
                     error_count += 1
                     print(f'* Failed to download {manga_chapters[j]["name"]} Chapter {manga_chapters[j]["number"]} (URL {i + 1}).')
                     if args.print_exceptions:
                         traceback.print_exc()
+        except SystemExit:
+            exit(0)
         except KeyboardInterrupt:
             exit(0)
         except:
