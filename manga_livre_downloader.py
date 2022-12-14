@@ -1,6 +1,7 @@
 from requests import Session
 from pathlib import Path
 import imgdl
+import os
 from PIL import Image
 import shutil
 from argparse import ArgumentParser
@@ -75,6 +76,7 @@ class MangaLivreDownloader:
             manga_chapter_images_path / f'{i + 1:02d}.{manga_chapter_images[i].split(".")[-1]}' for i in range(len(manga_chapter_images))
         ]
         imgdl.download(manga_chapter_images, manga_chapter_images_location, force = True)
+        manga_chapter_images_location = [manga_chapter_images_path / manga_chapter_image for manga_chapter_image in os.listdir(manga_chapter_images_path)]
         if not self.no_pdf:
             images = [Image.open(manga_chapter_images_location[i]) for i in range(len(manga_chapter_images_location))]
             images[0].save(
