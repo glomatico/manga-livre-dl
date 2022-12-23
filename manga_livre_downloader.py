@@ -82,7 +82,8 @@ class MangaLivreDownloader:
             images[0].save(
                 manga_chapter_images_path.parent / f'Chapter {self.get_sanizated_string(manga_chapter["number"], False)}.pdf',
                 save_all = True,
-                append_images=images[1:]
+                append_images=images[1:],
+                quality = 80
             )
             shutil.rmtree(manga_chapter_images_path)
 
