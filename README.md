@@ -1,19 +1,29 @@
-# manga-livre-downloader
+# Manga Livre DL
 I don't really read manga, but a friend of mine asked me to create a script to download manga from https://mangalivre.net/. And so I did it.
 
 ## Setup
-1. Install Python 3.8 or higher
-2. Install imgdl with pip: 
-    ```
-    pip install imgdl
-    ```
+Install using pip:
+```
+pip install manga-livre-dl
+```
 
 ## Usage
 ```
-python manga_livre_downloader.py [URLS] [OPTIONS]
+usage: manga-livre-dl [-h] [-c CHAPTER_SELECTION [CHAPTER_SELECTION ...]] [-f FINAL_PATH] [-p] [-n] [-e] [-v]
+                   url [url ...]
+
+positional arguments:
+  url                   mangalivre.net manga URL
+
+options:
+  -h, --help            show this help message and exit
+  -c CHAPTER_SELECTION [CHAPTER_SELECTION ...], --chapter-selection CHAPTER_SELECTION [CHAPTER_SELECTION ...]
+                        Chapter selection. Can be "all", "last" or a list of chapters (default: ['all'])
+  -f FINAL_PATH, --final-path FINAL_PATH
+                        Final path (default: Manga Livre DL)
+  -p, --print-chapters  Print chapters and exit (default: False)
+  -n, --no-pdf          Don't make PDF (default: False)
+  -e, --print-exceptions
+                        Print exceptions (default: False)
+  -v, --version         show program's version number and exit
 ```
-The manga will be saved in `./Manga Livre Downloader` as .PDF by default, but the directory can be changed using `--final-path` argument.
-
-You can specify which chapters to download using the `--chapter-selection` argument. It downloads all chapters by default.
-
-Use `--help` argument to see all available options.
