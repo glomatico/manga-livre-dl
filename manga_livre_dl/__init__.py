@@ -2,7 +2,7 @@ from .manga_livre_dl import MangaLivreDl
 import argparse
 import traceback
 
-__version__ = '1.1'
+__version__ = '1.2'
 
 
 def main():
@@ -28,6 +28,12 @@ def main():
         help = 'Final path'
     )
     parser.add_argument(
+        '-o',
+        '--overwrite',
+        action = 'store_true',
+        help = 'Overwrite existing files'
+    )
+    parser.add_argument(
         '-p',
         '--print-chapters',
         action = 'store_true',
@@ -37,7 +43,7 @@ def main():
         '-n',
         '--no-pdf',
         action = 'store_true',
-        help = "Don't make PDF"
+        help = "Don't make PDF and delete images"
     )
     parser.add_argument(
         '-e',
@@ -62,14 +68,18 @@ def main():
                     print(manga_chapter['number'])
                 break
             for chapter in manga_chapters:
-                print(f'Downloading {chapter["name"]} Chapter {chapter["number"]} (URL {i + 1})...')
+                print(f'Downloading {chapter["name"]} Chapter {chapter["number"]} (URL {i + 1}/{len(args.url)})')
+                final_location = dl.get_final_location(chapter)
+                if not args.overwrite and dl.check_exists(final_location):
+                    continue
                 try:
-                    dl.download_manga_chapter_images(chapter)
+                    dl.download_manga_chapter(chapter, final_location)
+                    dl.make_pdf(final_location)
                 except KeyboardInterrupt:
                     exit()
                 except:
                     error_count += 1
-                    print(f'* Failed to download {chapter["name"]} Chapter {chapter["number"]} (URL {i + 1}).')
+                    print(f'Failed to download {chapter["name"]} Chapter {chapter["number"]} (URL {i + 1}/{len(args.url)})')
                     if args.print_exceptions:
                         traceback.print_exc()
         except SystemExit:
@@ -82,7 +92,7 @@ def main():
             if args.print_exceptions:
                 traceback.print_exc()
     if not args.print_chapters:
-        print(f'Done ({error_count} error(s)).')
+        print(f'Done ({error_count} error(s))')
 
 
 if __name__ == '__main__':
