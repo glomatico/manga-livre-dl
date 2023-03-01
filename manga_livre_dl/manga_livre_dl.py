@@ -1,7 +1,6 @@
 from requests import Session
 from pathlib import Path
-import imgdl
-import os
+import tqdm
 from PIL import Image
 import shutil
 
@@ -62,23 +61,39 @@ class MangaLivreDl:
         if dirty_string[-1:] == '.' and is_folder:
             dirty_string = dirty_string[:-1] + '_'
         return dirty_string.strip()
+
+
+    def get_final_location(self, chapter):
+        return self.final_path / self.get_sanizated_string(chapter["name"], True) / f'Chapter {self.get_sanizated_string(chapter["number"], True)}'
     
 
-    def download_manga_chapter_images(self, chapter):
-        manga_chapter_images_url = [manga_chapter_images['legacy'] for manga_chapter_images in self.session.get(f'https://mangalivre.net/leitor/pages/{chapter["releases"][list(chapter["releases"].keys())[0]]["id_release"]}.json').json()['images']]
-        manga_chapter_images_path = self.final_path / self.get_sanizated_string(chapter["name"], True) / f'Chapter {self.get_sanizated_string(chapter["number"], True)}'
-        manga_chapter_images_path.mkdir(parents=True, exist_ok=True)
-        chapter_images_location = [
-            manga_chapter_images_path / f'{i + 1:02d}.{manga_chapter_image_url.split(".")[-1]}' for i, manga_chapter_image_url in enumerate(manga_chapter_images_url)
-        ]
-        imgdl.download(manga_chapter_images_url, chapter_images_location, force = True)
-        chapter_images_location = [manga_chapter_images_path / manga_chapter_image for manga_chapter_image in os.listdir(manga_chapter_images_path)]
+    def check_exists(self, final_location):
+        if final_location.exists() or (final_location.parent / (final_location.name + '.pdf')).exists():
+            return True
+
+    
+    def download_manga_chapter(self, chapter, final_location):
+        manga_chapter_images_url = [i['legacy'] for i in self.session.get(f'https://mangalivre.net/leitor/pages/{chapter["releases"][list(chapter["releases"].keys())[0]]["id_release"]}.json').json()['images']]
+        manga_chapter_images_session = [self.session.get(i, stream = True) for i in manga_chapter_images_url]
+        total_size_in_bytes = sum(int(i.headers.get('content-length', 0)) for i in manga_chapter_images_session)
+        progress_bar = tqdm.tqdm(total = total_size_in_bytes, unit = 'iB', unit_scale = True, leave = False)
+        final_location.mkdir(parents = True, exist_ok = True)
+        for i, response in enumerate(manga_chapter_images_session):
+            if 'image' in response.headers['content-type']:
+                with open(final_location / f'{i:02d}.{response.url.split(".")[-1]}', 'wb') as file:
+                    for data in response.iter_content(1024):
+                        progress_bar.update(len(data))
+                        file.write(data)
+        progress_bar.close()
+    
+
+    def make_pdf(self, final_location):
         if not self.no_pdf:
-            images = [Image.open(chapter_image_location) for chapter_image_location in chapter_images_location]
+            images = [Image.open(i) for i in final_location.glob('*.jpg')]
             images[0].save(
-                manga_chapter_images_path.parent / f'Chapter {self.get_sanizated_string(chapter["number"], False)}.pdf',
+                final_location.parent / (final_location.name + '.pdf'),
                 save_all = True,
-                append_images=images[1:],
+                append_images = images[1:],
                 quality = 80
             )
-            shutil.rmtree(manga_chapter_images_path)
+            shutil.rmtree(final_location)
