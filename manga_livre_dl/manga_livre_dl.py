@@ -89,7 +89,7 @@ class MangaLivreDl:
 
     def make_pdf(self, final_location):
         if not self.no_pdf:
-            images = [Image.open(i) for i in final_location.glob('*.jpg')]
+            images = [Image.open(i) for i in final_location.glob('*')]
             images[0].save(
                 final_location.parent / (final_location.name + '.pdf'),
                 save_all = True,

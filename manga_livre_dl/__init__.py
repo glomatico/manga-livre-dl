@@ -2,7 +2,7 @@ from .manga_livre_dl import MangaLivreDl
 import argparse
 import traceback
 
-__version__ = '1.2'
+__version__ = '1.3'
 
 
 def main():
