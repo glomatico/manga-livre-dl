@@ -86,10 +86,10 @@ class MangaLivreDl:
 
 
     def download_manga_chapter(self, chapter, final_location, scan_key):
-        manga_chapter_images_url = [i['legacy'] for i in self.session.get(f'https://mangalivre.net/leitor/pages/{chapter["releases"][scan_key]["id_release"]}.json').json()['images']]
+        chapter_image_urls = [i['legacy'] for i in self.session.get(f'https://mangalivre.net/leitor/pages/{chapter["releases"][scan_key]["id_release"]}.json').json()['images']]
         final_location.mkdir(parents = True, exist_ok = True)
-        progress_bar = tqdm.tqdm(manga_chapter_images_url, leave = False)
-        for i, chapter_image_url in enumerate(manga_chapter_images_url):
+        progress_bar = tqdm.tqdm(chapter_image_urls, leave = False)
+        for i, chapter_image_url in enumerate(chapter_image_urls):
             response = self.session.get(chapter_image_url, stream = True)
             if 'image' in response.headers['content-type']:
                 with open(final_location / f'{i:02d}.{response.url.split(".")[-1]}', 'wb') as file:
