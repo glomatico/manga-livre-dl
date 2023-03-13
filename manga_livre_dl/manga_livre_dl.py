@@ -47,12 +47,12 @@ class MangaLivreDl:
                 if cha1['number'] == cha2['number']:
                     cha2['number'] = f'{cha2["number"]}_{count}'
                     count += 1
+        if not manga_chapters:
+            raise Exception('No chapters found.')
         if chapter_selection[0] == 'last':
             manga_chapters = [manga_chapters[-1]]
         elif chapter_selection[0] != 'all':
             manga_chapters = [manga_chapter for manga_chapter in manga_chapters if manga_chapter['number'] in chapter_selection]
-        if not manga_chapters:
-            raise Exception('No chapters found.')
         return manga_chapters
 
     
