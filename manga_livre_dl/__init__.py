@@ -2,7 +2,7 @@ from .manga_livre_dl import MangaLivreDl
 import argparse
 import traceback
 
-__version__ = '1.3'
+__version__ = '1.4'
 
 
 def main():
@@ -40,6 +40,12 @@ def main():
         help = 'Print chapters and exit'
     )
     parser.add_argument(
+        '-a',
+        '--ask-scan',
+        action = 'store_true',
+        help = 'Ask for scan selection'
+    )
+    parser.add_argument(
         '-n',
         '--no-pdf',
         action = 'store_true',
@@ -58,7 +64,7 @@ def main():
         version = f'%(prog)s {__version__}'
     )
     args = parser.parse_args()
-    dl = MangaLivreDl(args.final_path, args.no_pdf)
+    dl = MangaLivreDl(args.final_path, args.no_pdf, args.ask_scan)
     error_count = 0
     for i, url in enumerate(args.url):
         try:
@@ -70,10 +76,11 @@ def main():
             for chapter in manga_chapters:
                 print(f'Downloading {chapter["name"]} Chapter {chapter["number"]} (URL {i + 1}/{len(args.url)})')
                 final_location = dl.get_final_location(chapter)
+                scan_key = dl.get_scan_key(chapter)
                 if not args.overwrite and dl.check_exists(final_location):
                     continue
                 try:
-                    dl.download_manga_chapter(chapter, final_location)
+                    dl.download_manga_chapter(chapter, final_location, scan_key)
                     dl.make_pdf(final_location)
                 except KeyboardInterrupt:
                     exit()
@@ -88,7 +95,7 @@ def main():
             exit(0)
         except:
             error_count += 1
-            print(f'* Failed to download URL {i + 1}')
+            print(f'Failed to download URL {i + 1}')
             if args.print_exceptions:
                 traceback.print_exc()
     if not args.print_chapters:

@@ -6,9 +6,10 @@ import shutil
 
 
 class MangaLivreDl:
-    def __init__(self, final_path, no_pdf):
+    def __init__(self, final_path, no_pdf, ask_scan):
         self.final_path = Path(final_path)
         self.no_pdf = no_pdf
+        self.ask_scan = ask_scan
         self.session = Session()
         self.session.headers.update({
             'authority': 'mangalivre.net',
@@ -70,20 +71,31 @@ class MangaLivreDl:
     def check_exists(self, final_location):
         if final_location.exists() or (final_location.parent / (final_location.name + '.pdf')).exists():
             return True
-
     
-    def download_manga_chapter(self, chapter, final_location):
-        manga_chapter_images_url = [i['legacy'] for i in self.session.get(f'https://mangalivre.net/leitor/pages/{chapter["releases"][list(chapter["releases"].keys())[0]]["id_release"]}.json').json()['images']]
-        manga_chapter_images_session = [self.session.get(i, stream = True) for i in manga_chapter_images_url]
-        total_size_in_bytes = sum(int(i.headers.get('content-length', 0)) for i in manga_chapter_images_session)
-        progress_bar = tqdm.tqdm(total = total_size_in_bytes, unit = 'iB', unit_scale = True, leave = False)
+
+    def get_scan_key(self, chapter):
+        choice = 1
+        if len(chapter['releases'].keys()) > 1 and self.ask_scan:
+            for i, scan in enumerate(chapter['releases']):
+                print(f'{i + 1} = {chapter["releases"][scan]["scanlators"][0]["name"]}')
+            while True:
+                choice = input(f'Select scan: ')
+                if choice.isdigit() and 0 < int(choice) <= len(chapter['releases']):
+                    break
+        return list(chapter['releases'].keys())[int(choice) - 1]
+
+
+    def download_manga_chapter(self, chapter, final_location, scan_key):
+        manga_chapter_images_url = [i['legacy'] for i in self.session.get(f'https://mangalivre.net/leitor/pages/{chapter["releases"][scan_key]["id_release"]}.json').json()['images']]
         final_location.mkdir(parents = True, exist_ok = True)
-        for i, response in enumerate(manga_chapter_images_session):
+        progress_bar = tqdm.tqdm(manga_chapter_images_url, leave = False)
+        for i, chapter_image_url in enumerate(manga_chapter_images_url):
+            response = self.session.get(chapter_image_url, stream = True)
             if 'image' in response.headers['content-type']:
                 with open(final_location / f'{i:02d}.{response.url.split(".")[-1]}', 'wb') as file:
                     for data in response.iter_content(1024):
-                        progress_bar.update(len(data))
                         file.write(data)
+            progress_bar.update()
         progress_bar.close()
     
 

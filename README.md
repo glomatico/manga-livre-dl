@@ -10,7 +10,7 @@ I don't really read manga, but a friend of mine asked me to create a script to d
 
 ## Usage
 ```
-usage: manga-livre-dl [-h] [-c CHAPTER_SELECTION [CHAPTER_SELECTION ...]] [-f FINAL_PATH] [-o] [-p] [-n] [-e] [-v]
+usage: manga-livre-dl [-h] [-c CHAPTER_SELECTION [CHAPTER_SELECTION ...]] [-f FINAL_PATH] [-o] [-p] [-a] [-n] [-e] [-v]
                    url [url ...]
 
 positional arguments:
@@ -24,6 +24,7 @@ options:
                         Final path (default: Manga Livre DL)
   -o, --overwrite       Overwrite existing files (default: False)
   -p, --print-chapters  Print chapters and exit (default: False)
+  -a, --ask-scan        Ask for scan selection (default: False)
   -n, --no-pdf          Don't make PDF and delete images (default: False)
   -e, --print-exceptions
                         Print exceptions (default: False)
