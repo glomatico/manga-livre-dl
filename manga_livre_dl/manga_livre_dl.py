@@ -27,7 +27,7 @@ class MangaLivreDl:
     
 
     def get_manga_chapters(self, url, chapter_selection):
-        manga_id = url.split('/')[-1]
+        manga_id = url.split('/')[-2]
         manga_chapters = []
         offset = 0
         while True:
