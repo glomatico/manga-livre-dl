@@ -51,6 +51,8 @@ class MangaLivreDl:
             raise Exception('No chapters found.')
         if chapter_selection[0] == 'last':
             manga_chapters = [manga_chapters[-1]]
+        elif len((range_chapters := chapter_selection[0].split('-'))) > 1:
+            manga_chapters = [manga_chapter for manga_chapter in manga_chapters if manga_chapter['number'] in [str(x) for x in range(int(range_chapters[0]), int(range_chapters[-1])+1)]]
         elif chapter_selection[0] != 'all':
             manga_chapters = [manga_chapter for manga_chapter in manga_chapters if manga_chapter['number'] in chapter_selection]
         return manga_chapters

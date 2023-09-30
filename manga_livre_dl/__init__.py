@@ -19,7 +19,7 @@ def main():
         '--chapter-selection',
         nargs = '+',
         default = ['all'],
-        help = 'Chapter selection. Can be "all", "last" or a list of chapters'
+        help = 'Chapter selection. Can be "all", "last", a list of chapters or range "init-end"'
     )
     parser.add_argument(
         '-f',
